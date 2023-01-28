@@ -1,7 +1,6 @@
 #ifndef SEPARATE_CHAINING_HASH_TABLE
 #define SEPARATE_CHAINING_HASH_TABLE
 
-
 // Headers from standard libraries
 #include <functional>
 #include <utility>
@@ -24,59 +23,44 @@ public:
         using table_type  = std::vector<bucket_type>;
         using size_type   = std::size_t;
 public:
-        separate_chaining_hash_table()
-                : m_size{0}
-                , m_table{}
-        {
-                m_table.resize(m_table_default_size);
-        }
-        
-        ~separate_chaining_hash_table() 
-        {
-                
-        }
+        /// default constructor․
+        separate_chaining_hash_table();
+        /// destructor․
+        ~separate_chaining_hash_table(); 
 public:
-        void insert(const value_type& e)
-        {
-                size_type index = find_the_key_index(e.first);
-                bucket_type& bucket = m_table[index];
-                bucket.push_front(std::move(e));
-                ++m_size;
-        }
+       /**
+        * @brief inserts the given value into the hash table.
+        * @param e the value to be inserted into the table is represented by a pair.
+        */
+        void insert(const value_type& e);
         
-        Value& operator[](const Key& k)
-        {
-                size_type index = find_the_key_index(k);
-                bucket_type backet = m_table[index];
-                auto it = std::find_if(std::begin(backet), std::end(backet),
-                                [&](const value_type& v) { return v.first ==  k; } ); 
-                return (*it).second; 
-        }
+       /**
+        * @brief to access an element with a given key, and create it if the element does not exist.
+        * @param k the key to access the value of the element.
+        * @return reference to the value of the element with the given key․
+        */
+        Value& operator[](const Key& k);
 
-        size_type get_table_size() const noexcept
-        {
-                return m_table.size();
-        }
+        /// returns the number of buckets in the table.
+        size_type get_table_size() const noexcept { return m_table.size(); }
         
-        size_type get_size() const noexcept
-        {
-                return m_size;
-        }
+        /// returns the number of elements in the table. 
+        size_type get_size() const noexcept { return m_size; }
 
 private:
-        size_type find_the_key_index(const Key& k)
-        {
-                return Hash()(k) % table_size();         
-        }
-
+        // heleper functions
+        size_type find_the_key_index(const Key&);
 private:
         table_type m_table;
         size_type  m_size;
         static constexpr inline size_type m_table_default_size = 20;
 }; // class separate_chaining_hash_table
 
-} //hash_table
+} // namespace hash_table
+
+// It's not considered good practice to do this, 
+// but it makes the class interface cleaner 
+// and allows you to split the template class into files. 
+#include "separate_chaining_hash_table.cpp"
 
 #endif // SEPARATE_CHAINING_HASH_TABLE
-
-
