@@ -29,8 +29,18 @@ int main()
         table.insert({1, "BBB"});
         table.insert({2, "CCC"});
         table.insert({3, "DDD"});
-        std::cout << table[3] << std::endl;
         table.erase(3);
+        table.erase(2);
+        std::cout << table[0] << std::endl;
+        std::cout << table.find(0) << std::endl;
+        std::cout << table.get_table_size() << std::endl;
+        std::cout << table.get_size() << std::endl;
+        std::cout << table.load_factor() << std::endl;
+        //for (auto it : table) {
+        //        std::cout << it << std::endl;
+        //}
+        //std::cout << table[3] << std::endl;
+        //table.erase(3);
 
         //std::cout << table[3] << std::endl;
         // auto it = table.insert({3, "DDD"}).first;

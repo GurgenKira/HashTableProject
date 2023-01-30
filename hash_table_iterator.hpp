@@ -1,6 +1,8 @@
 #ifndef HASH_TABLE_ITERATOR_HPP
 #define HASH_TABLE_ITERATOR_HPP
 
+#include <vector>
+
 namespace hash_table {
 
 template <typename separate_chaining_hash_table>
@@ -14,7 +16,7 @@ public:
 public: 
         
         /// constructor․
-        hash_table_iterator(const bucket_type& b) : m_bucket{b} {} 
+        hash_table_iterator(typename std::vector<bucket_type>::iterator it) : m_it{it} {} 
 
         /// prefix operator++
         hash_table_iterator& operator++();
@@ -35,8 +37,9 @@ public:
         //friend bool operator!= (const Iterator& a, const Iterator& b);
 
 private:
-        bucket_type m_bucket;
+        typename std::vector<bucket_type>::iterator m_it;
 }; // class hash_table_iterator
+
 
 } // namespace hash_table
 
