@@ -26,11 +26,11 @@ class separate_chaining_hash_table
 {
         enum { table_default_size = 1 };
 public:
-        using value_type        = std::pair<Key, Value>;
-        using bucket_type       = std::forward_list<value_type>;
-        using table_type        = std::vector<bucket_type>;
-        using size_type         = std::size_t;
-        using iterator_type     = hash_table_iterator<separate_chaining_hash_table<Key,
+        using value_type    = std::pair<Key, Value>;
+        using bucket_type   = std::vector<value_type>;
+        using table_type    = std::vector<bucket_type>;
+        using size_type     = std::size_t;
+        using iterator_type = hash_table_iterator<separate_chaining_hash_table<Key,
                                                                              Value,
                                                                              Hash,
                                                                              KeyEqual>>;
@@ -79,7 +79,7 @@ public:
         * @param k the key to access the value of the element.
         * @return reference to the value of the element with the given key․
         */
-        const Value& operator[](const Key& k);
+        Value operator[](const Key& k);
 
         /// returns the number of buckets in the table.
         size_type get_table_size() const noexcept 
@@ -107,7 +107,7 @@ public:
                 std::shared_lock<std::shared_mutex> lock(m_mutex);
                 return iterator_type(m_table.begin()); 
         }
-        
+       
        /**
         * @brief returns an iterator to the element following the last element of the separate_chaining_hash_table.
         * @return iterator to the element following the last element.
@@ -115,16 +115,16 @@ public:
         iterator_type end() 
         {
                 std::shared_lock<std::shared_mutex> lock(m_mutex);
-                return iterator_type(m_table.end()); 
+                return iterator_type(m_table.begin() + get_size()); 
         }
         
 private:
         // heleper functions
         size_type find_the_key_index(const Key&) const;
-        bool key_exists_in_bucket(const Key&, const bucket_type&) const;
+        decltype(auto) find_key_in_bucket(const Key&, const bucket_type&) const;
 
         void rehash();
-private:
+public:
         table_type   m_table;
         size_type    m_size;
         mutable std::shared_mutex m_mutex;

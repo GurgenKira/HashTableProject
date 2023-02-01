@@ -115,10 +115,10 @@ insert(const value_type& e)
         }
         const size_type index = find_the_key_index(e.first);
         bucket_type& bucket = m_table[index];
-        if (key_exists_in_bucket(e.first, bucket)) {
+        if (find_key_in_bucket(e.first, bucket) != std::end(bucket)) {
                 return false;
         }
-        bucket.push_front(std::move(e));
+        bucket.push_back(std::move(e));
         ++m_size;
         return true;
 }
@@ -139,18 +139,17 @@ erase(const Key& k)
         if (bucket.empty()) {
                 return false;
         }
-        auto curr = bucket.begin();
-        auto prev = bucket.before_begin();
-        while (curr != std::end(bucket)) {
-            if (curr->first == k) {
-                bucket.erase_after(prev);
-                --m_size;
-                return true;
-            }
-            ++prev;
-            ++curr;
+        auto ri = std::remove_if(std::begin(bucket), std::end(bucket),
+                                [&](const value_type& v)
+                                {
+                                        return v.first == k;
+                                });
+        if (ri == std::end(bucket)) {
+                return false;
         }
-        return false;
+        bucket.erase(ri);
+        --m_size;
+        return true;
 }
 
 template<
@@ -166,7 +165,7 @@ find(const Key& k) const
         std::shared_lock<std::shared_mutex> lock(m_mutex);
         const size_type index = find_the_key_index(k);
         const bucket_type& bucket = m_table[index];
-        return key_exists_in_bucket(k, bucket); 
+        return find_key_in_bucket(k, bucket) != std::end(bucket); 
 }
 
 template<
@@ -175,18 +174,19 @@ template<
         typename Hash,
         typename KeyEqual
 >
-const Value& 
+Value
 separate_chaining_hash_table<Key, Value, Hash, KeyEqual>::
 operator[](const Key& k)
 {
         std::shared_lock<std::shared_mutex> lock(m_mutex);
         const size_type index = find_the_key_index(k);
         const bucket_type& bucket = m_table[index];
-        auto it = std::find_if(std::begin(bucket), std::end(bucket),
-                        [&](const value_type& v) { return v.first ==  k; } );
+        auto it = find_key_in_bucket(k, bucket);
+        Value value = Value();
         if (it != std::end(bucket)) { 
-                return it->second;
-        } 
+                value = it->second;
+        }
+        return value;
 }
 
 template<
@@ -225,15 +225,15 @@ template<
         typename Hash,
         typename KeyEqual
 >
-bool 
+decltype(auto)
 separate_chaining_hash_table<Key, Value, Hash, KeyEqual>::
-key_exists_in_bucket(const Key& k, const bucket_type& b) const
+find_key_in_bucket(const Key& k, const bucket_type& b) const
 {
         return std::find_if(std::begin(b), std::end(b), 
                                         [&](const value_type& v) 
                                         {
                                                 return v.first == k; 
-                                        }) != std::end(b); 
+                                        }); 
 }
 
 template<
@@ -252,7 +252,7 @@ rehash()
                 for (value_type& elem : bac) {
                         const size_type hash  = Hash()(elem.first);
                         const size_type index = hash % nst;
-                        new_table[index].push_front(std::move(elem));
+                        new_table[index].push_back(std::move(elem));
                 }
         }
         m_table.swap(new_table);

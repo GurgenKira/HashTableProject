@@ -16,28 +16,47 @@ public:
 public: 
         
         /// constructor․
-        hash_table_iterator(typename std::vector<bucket_type>::iterator it) : m_it{it} {} 
+        hash_table_iterator(typename std::vector<bucket_type>::iterator it) 
+                : m_buket_it{it}
+        {} 
 
         /// prefix operator++
-        hash_table_iterator& operator++();
+        hash_table_iterator& operator++()
+        {
+                m_buket_it++;
+                return *this;
+        }
         
         /// postfix operator++
-        hash_table_iterator operator++(int);
-        
-        /// operator->
-        pointer_type operator->();
-        
+        hash_table_iterator operator++(int)
+        {
+                hash_table_iterator<separate_chaining_hash_table> old_value(*this);
+                 ++(*this);
+                return old_value;
+        }
+
         /// operator*
-        reference_type operator*();
+        // TODO
+        reference_type operator*()
+        {
+                return m_buket_it->front();   
+        }
 
         /// operator==
-        //friend bool operator== (const iterator& a, const iterator& b);
+        friend bool operator==(const hash_table_iterator& a, const hash_table_iterator& b)
+        {
+                return a.m_buket_it == b.m_buket_it;
+        }
         
         /// operator!=
-        //friend bool operator!= (const Iterator& a, const Iterator& b);
+        friend bool operator!=(const hash_table_iterator& a, const hash_table_iterator& b)
+        {
+                return !(a == b);
+        }
 
 private:
-        typename std::vector<bucket_type>::iterator m_it;
+        typename std::vector<bucket_type>::iterator m_buket_it;
+        std::size_t m_index;
 }; // class hash_table_iterator
 
 
