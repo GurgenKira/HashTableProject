@@ -13,11 +13,17 @@ int main()
         mymap.insert({1, "AAA"});
         mymap.insert({2, "BBB"});
         mymap.insert({3, "CCC"});
-        std::cout << mymap[3] << std::endl;
-        std::cout << mymap[2] << std::endl;
-        assert(mymap.erase(2));
-        assert(mymap.get_size() == 2);
-        assert(!mymap.find(2));
+        assert(mymap[3] == "CCC");
+        assert(mymap[2] == "BBB");
+        assert(mymap.get_size() == 3);
         assert(mymap.find(1));
+        for (auto it : mymap) {
+                std::cout << "it.first : " << it.first << " : it.second : " << it.second << std::endl;
+        }
+        for (auto it = mymap.begin(); it != mymap.end(); ++it) {
+                std::cout << "(*it).first : " << (*it).first << " : (*it).second : " << (*it).second << std::endl;
+        }
+        assert(mymap.erase(3));
+        assert(!mymap.find(3));
         return 0;
 }

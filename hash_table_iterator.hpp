@@ -11,7 +11,7 @@ class hash_table_iterator
 public:
         using value_type     = typename separate_chaining_hash_table::value_type;
         using bucket_type    = typename separate_chaining_hash_table::bucket_type; 
-        using reference_type = bucket_type&;
+        using reference_type = value_type&;
 public: 
         
         /// constructor․
@@ -38,7 +38,7 @@ public:
         // TODO
         reference_type operator*()
         {
-                return m_table_it;   
+                return m_table_it->front();
         }
 
         /// operator==
