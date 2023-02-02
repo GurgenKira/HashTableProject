@@ -12,8 +12,8 @@ template<
 >
 separate_chaining_hash_table<Key, Value, Hash, KeyEqual>::
 separate_chaining_hash_table()
-        : m_size(0)
-        , m_table{}
+        : m_table{}
+        , m_size(0)
 {
         m_table.resize(table_default_size);
 }
@@ -72,7 +72,7 @@ operator=(const separate_chaining_hash_table& o)
         std::unique_lock<std::shared_mutex> lock(m_mutex);
         std::unique_lock<std::shared_mutex> lock2(o.m_mutex);
         if (this != &o) {
-                m_table.clear(); 
+                m_table.clear();
                 m_table = o.m_table;
                 m_size = o.m_size;
         }
@@ -92,7 +92,7 @@ operator=(separate_chaining_hash_table&& o)
         std::unique_lock<std::shared_mutex> lock(m_mutex);
         std::unique_lock<std::shared_mutex> lock2(o.m_mutex);
         if (this != &o) {
-                m_table.clear(); 
+                m_table.clear();
                 m_table = std::move(o.m_table);
                 m_size = std::move(o.m_size);
         }
@@ -118,7 +118,7 @@ insert(const value_type& e)
         if (find_key_in_bucket(e.first, bucket) != std::end(bucket)) {
                 return false;
         }
-        bucket.push_back(std::move(e));
+        bucket.push_front(std::move(e));
         ++m_size;
         return true;
 }
@@ -139,17 +139,18 @@ erase(const Key& k)
         if (bucket.empty()) {
                 return false;
         }
-        auto ri = std::remove_if(std::begin(bucket), std::end(bucket),
-                                [&](const value_type& v)
-                                {
-                                        return v.first == k;
-                                });
-        if (ri == std::end(bucket)) {
-                return false;
+        auto curr = bucket.begin();
+        auto prev = bucket.before_begin();
+        while (curr != std::end(bucket)) {
+                if (curr->first == k) {
+                        bucket.erase_after(prev);
+                        --m_size;
+                        return true;
+                }
+                ++prev;
+                ++curr;
         }
-        bucket.erase(ri);
-        --m_size;
-        return true;
+        return false;
 }
 
 template<
@@ -180,7 +181,7 @@ operator[](const Key& k)
 {
         std::shared_lock<std::shared_mutex> lock(m_mutex);
         const size_type index = find_the_key_index(k);
-        const bucket_type& bucket = m_table[index];
+        bucket_type& bucket = m_table[index];
         auto it = find_key_in_bucket(k, bucket);
         Value value = Value();
         if (it != std::end(bucket)) { 
@@ -252,7 +253,7 @@ rehash()
                 for (value_type& elem : bac) {
                         const size_type hash  = Hash()(elem.first);
                         const size_type index = hash % nst;
-                        new_table[index].push_back(std::move(elem));
+                        new_table[index].push_front(std::move(elem));
                 }
         }
         m_table.swap(new_table);

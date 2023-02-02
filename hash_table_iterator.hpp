@@ -11,19 +11,18 @@ class hash_table_iterator
 public:
         using value_type     = typename separate_chaining_hash_table::value_type;
         using bucket_type    = typename separate_chaining_hash_table::bucket_type; 
-        using pointer_type   = value_type*;
-        using reference_type = value_type&;
+        using reference_type = bucket_type&;
 public: 
         
         /// constructor․
-        hash_table_iterator(typename std::vector<bucket_type>::iterator it) 
-                : m_buket_it{it}
+        hash_table_iterator(typename std::vector<bucket_type>::iterator it)
+                : m_table_it{it}
         {} 
 
         /// prefix operator++
         hash_table_iterator& operator++()
         {
-                m_buket_it++;
+                m_table_it++;
                 return *this;
         }
         
@@ -39,13 +38,13 @@ public:
         // TODO
         reference_type operator*()
         {
-                return m_buket_it->front();   
+                return m_table_it;   
         }
 
         /// operator==
         friend bool operator==(const hash_table_iterator& a, const hash_table_iterator& b)
         {
-                return a.m_buket_it == b.m_buket_it;
+                return a.m_table_it == b.m_table_it;
         }
         
         /// operator!=
@@ -55,8 +54,7 @@ public:
         }
 
 private:
-        typename std::vector<bucket_type>::iterator m_buket_it;
-        std::size_t m_index;
+        typename std::vector<bucket_type>::iterator m_table_it;
 }; // class hash_table_iterator
 
 

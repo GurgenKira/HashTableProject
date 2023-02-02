@@ -4,10 +4,8 @@
 
 // Headers from standard libraries
 #include <cassert>
-
-#include <iostream>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 int operation_count = 10000;
 
